@@ -1,35 +1,51 @@
 import MeetupDetails from "../../components/meetups/MeetupDetails";
+import { MongoClient, ObjectId } from "mongodb";
 
 function Detailes(props) {
     return <MeetupDetails {...props.meetupData} />;
 }
 
 export async function getStaticPaths() {
+    const client = await MongoClient.connect(
+        "mongodb+srv://react-nextjs:react-nextjs@cluster0.tlgrilq.mongodb.net/meetups?retryWrites=true&w=majority"
+    );
+
+    const db = client.db();
+    const meetupsCollection = db.collection("meetups");
+    const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
+
+    client.close();
+
     return {
         fallback: false,
-        paths: [
-            {
-                params: {
-                    meetupID: "m1",
-                },
-            },
-            {
-                params: {
-                    meetupID: "m2",
-                },
-            },
-        ],
+        paths: meetups.map((meetup) => ({
+            params: { meetupID: meetup._id.toString() },
+        })),
     };
 }
 
 export async function getStaticProps(context) {
     const meetupID = context.params.meetupID;
 
+    const client = await MongoClient.connect(
+        "mongodb+srv://react-nextjs:react-nextjs@cluster0.tlgrilq.mongodb.net/meetups?retryWrites=true&w=majority"
+    );
+
+    const db = client.db();
+    const meetupsCollection = db.collection("meetups");
+    const selectedMeetup = await meetupsCollection.findOne({
+        _id: ObjectId(meetupID),
+    });
+
+    client.close();
+
     return {
         props: {
             meetupData: {
-                image: "https://wallpapercave.com/wp/5d5Ox2o.jpg",
-                id: meetupID,
+                id: selectedMeetup._id.toString(),
+                title: selectedMeetup.title.toString(),
+                address: selectedMeetup.address.toString(),
+                image: selectedMeetup.image.toString(),
             },
         },
     };
