@@ -1,10 +1,10 @@
 import classes from "./MeetupDetails.module.css";
 
-function MeetupDetails() {
+function MeetupDetails(props) {
     return (
         <div className={classes.detail}>
             <img
-                src="https://wallpapercave.com/wp/5d5Ox2o.jpg"
+                src={props.image}
                 alt="Gorgeous place..."
                 width="500"
                 height="250"
